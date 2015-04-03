@@ -58,6 +58,7 @@ createContext = (options={}) ->
       constrainToWindow: true
       classes: ''
       remove: false
+      retainArrows: true
       tetherOptions: {}
 
   extend drop, defaultOptions, options
@@ -165,6 +166,7 @@ createContext = (options={}) ->
         targetOffset: '0 0'
         enabled: false
         constraints: constraints
+        keepElementAttached: @options.retainArrows
 
       if @options.tetherOptions isnt false
         @tether = new Tether extend {}, options, @options.tetherOptions
