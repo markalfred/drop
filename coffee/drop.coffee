@@ -140,8 +140,8 @@ createContext = (options={}) ->
       if @options.constrainToScrollParent
         constraints.push
           to: 'scrollParent'
-          pin: 'top, bottom'
-          attachment: 'together none'
+          pin: true
+          attachment: 'together'
       else
         # To get 'out of bounds' classes
         constraints.push
