@@ -86,6 +86,7 @@
         constrainToWindow: true,
         classes: '',
         remove: false,
+        retainArrows: true,
         tetherOptions: {}
       }
     };
@@ -173,8 +174,8 @@
         if (this.options.constrainToScrollParent) {
           constraints.push({
             to: 'scrollParent',
-            pin: 'top, bottom',
-            attachment: 'together none'
+            pin: true,
+            attachment: 'together'
           });
         } else {
           constraints.push({
@@ -200,7 +201,8 @@
           offset: '0 0',
           targetOffset: '0 0',
           enabled: false,
-          constraints: constraints
+          constraints: constraints,
+          keepElementAttached: this.options.retainArrows
         };
         if (this.options.tetherOptions !== false) {
           return this.tether = new Tether(extend({}, options, this.options.tetherOptions));

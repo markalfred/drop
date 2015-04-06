@@ -13,7 +13,7 @@
 }(this, function(require,exports,module) {
 
 (function() {
-  var Evented, addClass, defer, deferred, extend, flush, getBounds, getOffsetParent, getOrigin, getScrollBarSize, getScrollParent, hasClass, node, removeClass, uniqueId, updateClasses, zeroPosCache,
+  var Evented, addClass, defer, deferred, extend, flush, getBounds, getClassName, getOffsetParent, getOrigin, getScrollBarSize, getScrollParent, hasClass, node, removeClass, setClassName, uniqueId, updateClasses, zeroPosCache,
     __hasProp = {}.hasOwnProperty,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __slice = [].slice;
@@ -39,7 +39,7 @@
       if (style == null) {
         return parent;
       }
-      if (/(auto|scroll)/.test(style['overflow'] + style['overflow-y'] + style['overflow-x'])) {
+      if (/(auto|scroll)/.test(style['overflow'] + style['overflowY'] + style['overflowX'])) {
         if (position !== 'absolute' || ((_ref = style['position']) === 'relative' || _ref === 'absolute' || _ref === 'fixed')) {
           return parent;
         }
@@ -178,7 +178,7 @@
   };
 
   removeClass = function(el, name) {
-    var cls, _i, _len, _ref, _results;
+    var className, cls, _i, _len, _ref, _results;
     if (el.classList != null) {
       _ref = name.split(' ');
       _results = [];
@@ -190,7 +190,8 @@
       }
       return _results;
     } else {
-      return el.className = el.className.replace(new RegExp("(^| )" + (name.split(' ').join('|')) + "( |$)", 'gi'), ' ');
+      className = getClassName(el).replace(new RegExp("(^| )" + (name.split(' ').join('|')) + "( |$)", 'gi'), ' ');
+      return setClassName(el, className);
     }
   };
 
@@ -208,7 +209,8 @@
       return _results;
     } else {
       removeClass(el, name);
-      return el.className += " " + name;
+      cls = getClassName(el) + (" " + name);
+      return setClassName(el, cls);
     }
   };
 
@@ -216,8 +218,20 @@
     if (el.classList != null) {
       return el.classList.contains(name);
     } else {
-      return new RegExp("(^| )" + name + "( |$)", 'gi').test(el.className);
+      return new RegExp("(^| )" + name + "( |$)", 'gi').test(getClassName(el));
     }
+  };
+
+  getClassName = function(el) {
+    if (el.className instanceof SVGAnimatedString) {
+      return el.className.baseVal;
+    } else {
+      return el.className;
+    }
+  };
+
+  setClassName = function(el, className) {
+    return el.setAttribute('class', className);
   };
 
   updateClasses = function(el, add, all) {
@@ -1318,10 +1332,16 @@
           }
         }
         if (__indexOf.call(pinned, 'left') >= 0 || __indexOf.call(pinned, 'right') >= 0) {
-          eAttachment.left = tAttachment.left = false;
+          if (!this.options.keepElementAttached) {
+            eAttachment.left = false;
+          }
+          tAttachment.left = false;
         }
         if (__indexOf.call(pinned, 'top') >= 0 || __indexOf.call(pinned, 'bottom') >= 0) {
-          eAttachment.top = tAttachment.top = false;
+          if (!this.options.keepElementAttached) {
+            eAttachment.top = false;
+          }
+          tAttachment.top = false;
         }
         if (tAttachment.top !== targetAttachment.top || tAttachment.left !== targetAttachment.left || eAttachment.top !== this.attachment.top || eAttachment.left !== this.attachment.left) {
           this.updateAttachClasses(eAttachment, tAttachment);
@@ -1531,6 +1551,7 @@ return this.Tether;
         constrainToWindow: true,
         classes: '',
         remove: false,
+        retainArrows: true,
         tetherOptions: {}
       }
     };
@@ -1618,8 +1639,8 @@ return this.Tether;
         if (this.options.constrainToScrollParent) {
           constraints.push({
             to: 'scrollParent',
-            pin: 'top, bottom',
-            attachment: 'together none'
+            pin: true,
+            attachment: 'together'
           });
         } else {
           constraints.push({
@@ -1645,7 +1666,8 @@ return this.Tether;
           offset: '0 0',
           targetOffset: '0 0',
           enabled: false,
-          constraints: constraints
+          constraints: constraints,
+          keepElementAttached: this.options.retainArrows
         };
         if (this.options.tetherOptions !== false) {
           return this.tether = new Tether(extend({}, options, this.options.tetherOptions));
